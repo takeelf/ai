@@ -5,37 +5,57 @@ import matplotlib.pyplot as plt
 import torch.nn as nn
 import torch
 from joblib import dump
+from pymongo import MongoClient
+from sklearn.preprocessing import LabelEncoder
 
-dataset = load_diabetes()
-print(dataset.keys())
+client = MongoClient("mongodb+srv://takeelf:dnjsgh11!!aA@real-estate-cluster.sx265.mongodb.net/?retryWrites=true&w=majority&appName=real-estate-cluster")
+db = client['real_estate']
+collection = db['transaction_price']
 
-df = pd.DataFrame(dataset.data, columns=dataset.feature_names)
-df['target'] = dataset.target
+pipeline = [
+    {
+        "$project": {
+            "_id": 0,  # _id 필드 제외
+            "dealYear": 1,
+            "dealMonth": 1,
+            "excluUseAr": 1,
+            "umdNm": 1,
+            "dealAmount": 1
+        }
+    }
+]
 
-# print(df.head())
-# plt.figure(figsize=(20,10))
-# for i in range(10):
-#     plt.subplot(3, 4, i+1)
-#     plt.scatter(df.iloc[:, i], df['target'])
-#     plt.title(df.columns[i])
+cursor = collection.aggregate(pipeline)
+data = list(cursor)
 
-# plt.tight_layout()
-# plt.show()
+df = pd.DataFrame(data)
+df = df.dropna()
+
+label_encoder = LabelEncoder()
+df['umdNm'] = label_encoder.fit_transform(df['umdNm'])
+
+dump(label_encoder, 'realestate_label_encoder.pkl')
+
+# X(features)와 y(target) 분리
+X = df.drop('dealAmount', axis=1)  # target 제외한 모든 컬럼
+y = df['dealAmount']     
+
+client.close()
 
 model = nn.Sequential(
-    nn.Linear(10, 64),
+    nn.Linear(4, 32),
     nn.ReLU(),
-    nn.Linear(64, 16),
+    nn.Linear(32, 16),
     nn.ReLU(),
     nn.Linear(16, 1)
 )
 
 scaler = StandardScaler()
-X_scaled = scaler.fit_transform(df.iloc[:, :10])
+X_scaled = scaler.fit_transform(X)
 X = torch.FloatTensor(X_scaled)
-Y = torch.FloatTensor(df['target'].values).reshape(-1, 1)
+Y = torch.FloatTensor(y).reshape(-1, 1)
 
-batch_size = 64
+batch_size = 32
 learning_rate = 1e-4
 epochs = 30000
 
@@ -60,8 +80,8 @@ for epoch in range(epochs):
         print(f"2000 Epoch {epoch}, Loss: {loss.item()}")
 
 # 학습이 끝난 후 모델 저장
-MODEL_PATH = 'diabetes_model.pth'
-SCALER_PATH = 'diabetes_scaler.pkl'
+MODEL_PATH = 'realestate_model.pth'
+SCALER_PATH = 'realestate_scaler.pkl'
 dump(scaler, SCALER_PATH)
 
 # 모델 상태 저장
