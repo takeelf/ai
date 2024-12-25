@@ -56,6 +56,8 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
         
+        print(f"Epoch {epoch}, Loss: {loss.item()}")
+        
     if epoch % 2000 == 0:
         print(f"2000 Epoch {epoch}, Loss: {loss.item()}")
 

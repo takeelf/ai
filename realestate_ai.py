@@ -34,30 +34,47 @@ df = df.dropna()
 label_encoder = LabelEncoder()
 df['umdNm'] = label_encoder.fit_transform(df['umdNm'])
 
+# plt.figure(figsize=(10, 6))
+# for i in range(4):
+#     plt.subplot(2, 2, i+1)
+#     plt.scatter(df.iloc[:, i], df['dealAmount'])
+#     plt.title(df.columns[i])
+
+# plt.tight_layout()
+# plt.show()
+
+
 dump(label_encoder, 'realestate_label_encoder.pkl')
 
 # X(features)와 y(target) 분리
-X = df.drop('dealAmount', axis=1)  # target 제외한 모든 컬럼
+x = df.drop('dealAmount', axis=1)  # target 제외한 모든 컬럼
 y = df['dealAmount']     
 
 client.close()
 
 model = nn.Sequential(
-    nn.Linear(4, 32),
+    nn.Linear(4, 64),
     nn.ReLU(),
-    nn.Linear(32, 16),
+    nn.Linear(64, 16),
     nn.ReLU(),
     nn.Linear(16, 1)
 )
 
 scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+target_scaler = StandardScaler()
+X_scaled = scaler.fit_transform(x)
 X = torch.FloatTensor(X_scaled)
-Y = torch.FloatTensor(y).reshape(-1, 1)
+y_scaled = target_scaler.fit_transform(y.values.reshape(-1, 1))
+Y = torch.FloatTensor(y_scaled)
 
-batch_size = 32
+# 학습이 끝난 후 모델 저장
+MODEL_PATH = 'realestate_model.pth'
+SCALER_X_PATH = 'realestate_scaler_x.pkl'
+SCALER_Y_PATH = 'realestate_scaler_y.pkl'
+
+batch_size = 64
 learning_rate = 1e-4
-epochs = 30000
+epochs = 20000
 
 optimizer = torch.optim.SGD(params = model.parameters(), lr=learning_rate)
 
@@ -76,16 +93,16 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
         
+        print(f"each Epoch {epoch}, Loss: {loss.item()}")
+      
     if epoch % 2000 == 0:
         print(f"2000 Epoch {epoch}, Loss: {loss.item()}")
 
-# 학습이 끝난 후 모델 저장
-MODEL_PATH = 'realestate_model.pth'
-SCALER_PATH = 'realestate_scaler.pkl'
-dump(scaler, SCALER_PATH)
 
 # 모델 상태 저장
 torch.save(model, MODEL_PATH)
+dump(scaler, SCALER_X_PATH)
+dump(target_scaler, SCALER_Y_PATH)
 
 print(f"모델이 저장되었습니다: {MODEL_PATH}")
-print(f"Scaler가 저장되었습니다: {SCALER_PATH}")
+print(f"Scaler가 저장되었습니다: {SCALER_X_PATH}")
