@@ -20,7 +20,8 @@ def process_and_save_data(year, month):
             params = {
                 'serviceKey': 'yhCRir3QVIa+nL/vjH0uhPiZh9d8qxs3NTzqH1c4XCORTz2sawR52fE+M3/o8ze1qgXQq3dKApGO+8j35QdVNw==',
                 'LAWD_CD': code,
-                'DEAL_YMD': f"{year}{month:02d}"
+                'DEAL_YMD': f"{year}{month:02d}",
+                'numOfRows': 10000
             }
             
             try:
@@ -92,8 +93,8 @@ def process_and_save_data(year, month):
         client.close()
 
 def main():
-    for year in range(2010, 2025):
-        for month in range(1, 13):
+    for year in range(2007, 2008):
+        for month in range(11, 13):
             # 미래 데이터 제외
             if year == 2024 and month > 2:
                 continue

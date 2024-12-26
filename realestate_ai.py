@@ -14,6 +14,11 @@ collection = db['transaction_price']
 
 pipeline = [
     {
+        "$match": {
+            "umdNm": "이촌동"  # 이촌동 데이터만 필터링
+        }
+    },
+    {
         "$project": {
             "_id": 0,  # _id 필드 제외
             "dealYear": 1,
@@ -30,6 +35,8 @@ data = list(cursor)
 
 df = pd.DataFrame(data)
 df = df.dropna()
+
+print(f"이촌동 데이터 개수: {len(df)}")
 
 label_encoder = LabelEncoder()
 df['umdNm'] = label_encoder.fit_transform(df['umdNm'])
@@ -93,10 +100,10 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
         
-        print(f"each Epoch {epoch}, Loss: {loss.item()}")
+        # print(f"each Epoch {epoch}, Loss: {loss.item()}")
       
-    if epoch % 2000 == 0:
-        print(f"2000 Epoch {epoch}, Loss: {loss.item()}")
+    if epoch % 10 == 0:
+        print(f"10 Epoch {epoch}, Loss: {loss.item()}")
 
 
 # 모델 상태 저장

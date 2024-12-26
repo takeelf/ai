@@ -12,10 +12,10 @@ feature_names = ['dealMonth', 'dealYear', 'excluUseAr', 'umdNm']
 
 # 2. 실제 환자 데이터 입력 예시
 real_estate_data = [
-    6,        # age (나이)
-    2006,         # sex (성별)
-    84,      # bmi (체질량지수)
-    '도곡동',     # bp (평균 혈압)
+    1,        # dealMonth (거래월)
+    2006,         # dealYear (거래년도)
+    60,      # excluUseAr (전용면적)
+    '이촌동',     # umdNm (동이름)
 ]
 
 patient_df = pd.DataFrame([real_estate_data], columns=feature_names)
