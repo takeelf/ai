@@ -51,7 +51,7 @@ df['umdNm'] = label_encoder.fit_transform(df['umdNm'])
 # plt.show()
 
 
-dump(label_encoder, 'realestate_label_encoder.pkl')
+dump(label_encoder, 'realestate/realestate_label_encoder.pkl')
 
 # X(features)와 y(target) 분리
 x = df.drop('dealAmount', axis=1)  # target 제외한 모든 컬럼
@@ -75,15 +75,15 @@ y_scaled = target_scaler.fit_transform(y.values.reshape(-1, 1))
 Y = torch.FloatTensor(y_scaled)
 
 # 학습이 끝난 후 모델 저장
-MODEL_PATH = 'realestate_model.pth'
-SCALER_X_PATH = 'realestate_scaler_x.pkl'
-SCALER_Y_PATH = 'realestate_scaler_y.pkl'
+MODEL_PATH = 'realestate/realestate_model.pth'
+SCALER_X_PATH = 'realestate/realestate_scaler_x.pkl'
+SCALER_Y_PATH = 'realestate/realestate_scaler_y.pkl'
 
 batch_size = 64
 learning_rate = 1e-4
 epochs = 20000
 
-optimizer = torch.optim.SGD(params = model.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(params = model.parameters(), lr=learning_rate)
 
 for epoch in range(epochs):
     for i in range(0, len(X), batch_size):
